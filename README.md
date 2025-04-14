@@ -37,7 +37,7 @@ https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/
 
 ## Acknowledgments
 
-Thanks for [Ukrainian Interbank Association of Payment Systems Members EMA] (https://www.ema.com.ua) for this data
+Thanks for [Ukrainian Interbank Association of Payment Systems Members EMA] (https://ema.com.ua) for this data
 
 ## License
 
