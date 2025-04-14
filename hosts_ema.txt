@@ -1,16 +1,16 @@
-# Title: Blocklist from EMA.com.ua Blacklist API for DNS-level blocking (e.g., hosts file, Pi-hole)
+# Title: Blocklist from ema.com.ua Blacklist API for DNS-level blocking (e.g., hosts file, Pi-hole)
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-04-14 11:00:11 UTC
+# Last modified: 2025-04-14 18:57:43 UTC
 #
 # Sources:
-# - https://www.ema.com.ua/wp-json/api/blacklist-query (EMA.com.ua Blacklist API)
+# - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
 # Number of entries: 1925
 #
-# Source:\n\n
+# Source:
 0.0.0.0 0nkassashop.shop
 0.0.0.0 0nlinepaidlife.shop
 0.0.0.0 0nlykasatop.shop
