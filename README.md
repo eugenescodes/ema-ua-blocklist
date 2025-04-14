@@ -1,6 +1,6 @@
 # Blacklist Generator from ema.com.ua
 
-A simple Rust tool to fetch the official EMA (Association of Payment System Members of Ukraine) blacklist, extract potentially harmful hostnames, and generate blocklist files suitable for DNS-level blocking (e.g., Pi-hole, hosts file) and ad blockers (e.g., uBlock Origin, AdGuard).
+A simple tool to fetch the official EMA (Association of Payment System Members of Ukraine) blacklist, extract potentially harmful hostnames, and generate blocklist files suitable for DNS-level blocking (e.g., Pi-hole, hosts file) and ad blockers (e.g., uBlock Origin, AdGuard).
 
 ## Features
 
