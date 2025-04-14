@@ -20,7 +20,7 @@ pub struct BlacklistItem {
 }
 
 /// Represents the overall structure of the API JSON response.
-#[derive(Deserialize, Debug, Clone)] 
+#[derive(Deserialize, Debug, Clone)]
 pub struct ApiResponse {
     pub data: Vec<BlacklistItem>,
 }
@@ -37,7 +37,7 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
     }
 
     let url_to_parse = if !trimmed_url.contains("://") {
-        format!("http://{}", trimmed_url) 
+        format!("http://{}", trimmed_url)
     } else {
         trimmed_url.to_string()
     };
@@ -48,7 +48,6 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
         if parsed_url.scheme() != "http" && parsed_url.scheme() != "https" {
             return None; // Reject other schemes like mailto, ftp, etc.
         }
-        
 
         if let Some(host_str) = parsed_url.host_str() {
             if !host_str.contains('.') {
@@ -93,11 +92,8 @@ pub async fn fetch_all_hosts(
     let mut all_hosts = HashSet::new();
     let mut offset = 0;
 
-   
-
     loop {
         let api_url = format!("{}?offset={}", base_api_url, offset);
-        
 
         let response_result = client.get(&api_url).send().await;
 
@@ -114,11 +110,9 @@ pub async fn fetch_all_hosts(
                 match response.json::<ApiResponse>().await {
                     Ok(api_response) => {
                         if api_response.data.is_empty() {
-                            
                             return Ok(all_hosts);
                         }
 
-                        
                         for item in &api_response.data {
                             if let Some(url_str) = &item.url {
                                 if let Some(host) = extract_and_validate_host(url_str) {
@@ -158,7 +152,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let user_agent = "ema scraper bot (github.com/eugenescodes/ema-ua-blocklist)";
     let page_size = 12; // Page size (number of items per API request)
     let repo_name = "ema-ua-blocklist";
-    let license_file = "LICENSE"; 
+    let license_file = "LICENSE";
     let hosts_filename = "hosts_ema.txt";
     let ublock_filename = "hosts_ema_ublock.txt";
     // --- End Configuration ---
@@ -294,13 +288,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(e) => {
             eprintln!("Error creating file {}: {}", ublock_filename, e);
-            return Err(e.into()); 
+            return Err(e.into());
         }
     }
 
     println!("\nScript finished successfully.");
-    Ok(()) 
-} 
+    Ok(())
+}
 
 // --- Unit Test Module  ---
 #[cfg(test)]
