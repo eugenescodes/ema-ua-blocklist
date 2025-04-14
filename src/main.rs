@@ -185,7 +185,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "https://github.com/eugenescodes/{}/blob/main/{}",
         repo_name, license_file
     );
-    let source_description = "EMA.com.ua Blacklist API";
+    let source_description = "ema.com.ua Blacklist API";
     let now_utc = Utc::now();
     let timestamp_str = now_utc.format("%Y-%m-%d %H:%M:%S UTC").to_string();
 
@@ -252,7 +252,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
             let ublock_header = format!(
-                r#"! Title: EMA.com.ua Blacklist for Adblockers (uBlock Origin, AdGuard, etc.)
+                r#"! Title: ema.com.ua Blacklist for Adblockers (uBlock Origin, AdGuard, etc.)
 ! Homepage: {}
 ! License: {}
 ! Last modified: {}
