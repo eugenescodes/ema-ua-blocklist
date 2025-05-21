@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-05-21 06:22:36 UTC
+# Last modified: 2025-05-21 12:29:33 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1925
+# Number of entries: 1927
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -710,6 +710,7 @@
 0.0.0.0 macfly-store.com.ua
 0.0.0.0 macombrotary.com
 0.0.0.0 magicbem.com
+0.0.0.0 mailse.top
 0.0.0.0 main-wallet.com
 0.0.0.0 malta-casino.com
 0.0.0.0 maneyveo.co.ua
@@ -1872,6 +1873,7 @@
 0.0.0.0 www.shopsaguaro.club
 0.0.0.0 www.skyauto.com.ua
 0.0.0.0 www.slimpay.com.ua
+0.0.0.0 www.smaillink.vip
 0.0.0.0 www.sneakersadi2018.com
 0.0.0.0 www.start-pay.com.ua
 0.0.0.0 www.sup-hit.com
