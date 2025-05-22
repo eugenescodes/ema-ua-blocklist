@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-05-22 06:22:12 UTC
+# Last modified: 2025-05-22 12:31:22 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1927
+# Number of entries: 1929
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1583,6 +1583,7 @@
 0.0.0.0 tovaronlineollx.za.com
 0.0.0.0 trade.hermesfx.io
 0.0.0.0 tradeengine24.ru
+0.0.0.0 tradeforge.pro
 0.0.0.0 tradevisa.net
 0.0.0.0 trading.ubkplatform.com
 0.0.0.0 transfer2transfer.tech
@@ -1600,6 +1601,7 @@
 0.0.0.0 true-portall3.xyz
 0.0.0.0 trust-gos.top
 0.0.0.0 trust-group.pro
+0.0.0.0 trustncrypto.com
 0.0.0.0 ua-cash.com
 0.0.0.0 ua-compenses.top
 0.0.0.0 ua-dopomoga.store
