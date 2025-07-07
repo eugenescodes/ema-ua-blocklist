@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-07-07 06:24:33 UTC
+# Last modified: 2025-07-07 12:30:37 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1929
+# Number of entries: 1930
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -433,6 +433,7 @@
 0.0.0.0 finens.biz
 0.0.0.0 firefly-line.com
 0.0.0.0 firmusha.top
+0.0.0.0 firsteewix.cfd
 0.0.0.0 fish-ok.com
 0.0.0.0 fishing-centr.com
 0.0.0.0 fivestore.com.ua
