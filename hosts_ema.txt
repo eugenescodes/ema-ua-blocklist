@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-07-09 06:23:48 UTC
+# Last modified: 2025-07-09 12:30:54 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1930
+# Number of entries: 1931
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1883,6 +1883,7 @@
 0.0.0.0 www.superbinary.com
 0.0.0.0 www.swayauto.kiev.ua
 0.0.0.0 www.system-wallet.com
+0.0.0.0 www.tdianidahihaihiaoj.live
 0.0.0.0 www.terminal-sistem.com
 0.0.0.0 www.topup-mobile.biz.ua
 0.0.0.0 www.tri-tech.com.ua
