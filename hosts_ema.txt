@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-07-10 06:24:18 UTC
+# Last modified: 2025-07-10 12:31:22 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1931
+# Number of entries: 1933
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -164,6 +164,7 @@
 0.0.0.0 bistrie-viplati.club
 0.0.0.0 bit8363.buzz
 0.0.0.0 bitcoin-zuba.ga
+0.0.0.0 bizevolution.click
 0.0.0.0 blago-kovel.shop
 0.0.0.0 blago-privat24.3ida.site
 0.0.0.0 blago-privat24.d3ya.site
@@ -1430,6 +1431,7 @@
 0.0.0.0 satirdrama.fun
 0.0.0.0 satyr-drama.fun
 0.0.0.0 savings.wcomb.com
+0.0.0.0 scardopomot.jimdosite.com
 0.0.0.0 scooter-m.com.ua
 0.0.0.0 scooter.club.tilda.ws
 0.0.0.0 screen-shop.com.ua
