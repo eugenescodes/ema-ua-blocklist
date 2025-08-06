@@ -37,7 +37,7 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
     }
 
     let url_to_parse = if !trimmed_url.contains("://") {
-        format!("http://{}", trimmed_url)
+        format!("http://{trimmed_url}")
     } else {
         trimmed_url.to_string()
     };
@@ -61,18 +61,16 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
                 return Some(host_lower);
             }
         }
-    } else {
-        if !trimmed_url.contains(' ')
-            && !trimmed_url.starts_with('/')
-            && !trimmed_url.contains("://")
-            && trimmed_url.contains('.')
+    } else if !trimmed_url.contains(' ')
+        && !trimmed_url.starts_with('/')
+        && !trimmed_url.contains("://")
+        && trimmed_url.contains('.')
+    {
+        let host_lower = trimmed_url.to_lowercase();
+        if !host_lower.eq_ignore_ascii_case("ema.com.ua")
+            && !host_lower.eq_ignore_ascii_case("www.ema.com.ua")
         {
-            let host_lower = trimmed_url.to_lowercase();
-            if !host_lower.eq_ignore_ascii_case("ema.com.ua")
-                && !host_lower.eq_ignore_ascii_case("www.ema.com.ua")
-            {
-                return Some(host_lower);
-            }
+            return Some(host_lower);
         }
     }
 
@@ -93,7 +91,7 @@ pub async fn fetch_all_hosts(
     let mut offset = 0;
 
     loop {
-        let api_url = format!("{}?offset={}", base_api_url, offset);
+        let api_url = format!("{base_api_url}?offset={offset}");
 
         let response_result = client.get(&api_url).send().await;
 
@@ -127,15 +125,14 @@ pub async fn fetch_all_hosts(
                     }
                     Err(e) => {
                         return Err(format!(
-                            "Error: Failed to parse JSON response from {}: {}",
-                            api_url, e
+                            "Error: Failed to parse JSON response from {api_url}: {e}"
                         )
                         .into());
                     }
                 }
             }
             Err(e) => {
-                return Err(format!("Error: Network request failed for {}: {}", api_url, e).into());
+                return Err(format!("Error: Network request failed for {api_url}: {e}").into());
             }
         }
         // pause between requests
@@ -162,7 +159,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let all_hosts = match fetch_all_hosts(base_api_url, user_agent, page_size).await {
         Ok(hosts) => hosts,
         Err(e) => {
-            eprintln!("Error fetching data: {}", e);
+            eprintln!("Error fetching data: {e}");
             return Err(e);
         }
     };
@@ -179,12 +176,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // --- Prepare Header Information ---
     // Construct URLs assuming the script runs from the repo root
-    let homepage_url = format!("https://github.com/eugenescodes/{}", repo_name);
+    let homepage_url = format!("https://github.com/eugenescodes/{repo_name}");
     // Correct path assuming LICENSE is in the root
-    let license_url = format!(
-        "https://github.com/eugenescodes/{}/blob/main/{}",
-        repo_name, license_file
-    );
+    let license_url =
+        format!("https://github.com/eugenescodes/{repo_name}/blob/main/{license_file}",);
     let source_description = "ema.com.ua Blacklist API";
     let now_utc = Utc::now();
     let timestamp_str = now_utc.format("%Y-%m-%d %H:%M:%S UTC").to_string();
@@ -215,39 +210,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // --- Write Hosts File (0.0.0.0 format) ---
-    println!("\nWriting hosts file (0.0.0.0 format): {}", hosts_filename);
+    println!("\nWriting hosts file (0.0.0.0 format): {hosts_filename}");
     match File::create(hosts_filename) {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
-            if write!(writer, "{}", hosts_file_header).is_ok() {
+            if write!(writer, "{hosts_file_header}").is_ok() {
                 for host in &sorted_hosts {
                     // Add newline consistently with writeln!
-                    if writeln!(writer, "0.0.0.0 {}", host).is_err() {
-                        eprintln!("Error writing host line to {}", hosts_filename);
+                    if writeln!(writer, "0.0.0.0 {host}").is_err() {
+                        eprintln!("Error writing host line to {hosts_filename}");
                         // Consider returning an error instead of just breaking
-                        return Err(format!("Failed to write to {}", hosts_filename).into());
+                        return Err(format!("Failed to write to {hosts_filename}").into());
                     }
                 }
                 if writer.flush().is_err() {
-                    eprintln!("Error flushing buffer for {}", hosts_filename);
+                    eprintln!("Error flushing buffer for {hosts_filename}");
                     // Consider returning an error
-                    return Err(format!("Failed to flush {}", hosts_filename).into());
+                    return Err(format!("Failed to flush {hosts_filename}").into());
                 } else {
-                    println!("Successfully wrote {}", hosts_filename);
+                    println!("Successfully wrote {hosts_filename}");
                 }
             } else {
-                eprintln!("Error writing header to {}", hosts_filename);
-                return Err(format!("Failed to write header to {}", hosts_filename).into());
+                eprintln!("Error writing header to {hosts_filename}");
+                return Err(format!("Failed to write header to {hosts_filename}").into());
             }
         }
         Err(e) => {
-            eprintln!("Error creating file {}: {}", hosts_filename, e);
+            eprintln!("Error creating file {hosts_filename}: {e}");
             return Err(e.into());
         }
     }
 
     // --- Write uBlock Origin File (||domain.tld^ format) ---
-    println!("\nWriting uBlock Origin file: {}", ublock_filename);
+    println!("\nWriting uBlock Origin file: {ublock_filename}");
     match File::create(ublock_filename) {
         Ok(file) => {
             let mut writer = BufWriter::new(file);
@@ -268,26 +263,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 source_description,
                 sorted_hosts.len()
             );
-            if write!(writer, "{}", ublock_header).is_ok() {
+            if write!(writer, "{ublock_header}").is_ok() {
                 for host in &sorted_hosts {
-                    if writeln!(writer, "||{}^", host).is_err() {
-                        eprintln!("Error writing uBlock line to {}", ublock_filename);
-                        return Err(format!("Failed to write to {}", ublock_filename).into());
+                    if writeln!(writer, "||{host}^").is_err() {
+                        eprintln!("Error writing uBlock line to {ublock_filename}");
+                        return Err(format!("Failed to write to {ublock_filename}").into());
                     }
                 }
                 if writer.flush().is_err() {
-                    eprintln!("Error flushing buffer for {}", ublock_filename);
-                    return Err(format!("Failed to flush {}", ublock_filename).into());
+                    eprintln!("Error flushing buffer for {ublock_filename}");
+                    return Err(format!("Failed to flush {ublock_filename}").into());
                 } else {
-                    println!("Successfully wrote {}", ublock_filename);
+                    println!("Successfully wrote {ublock_filename}");
                 }
             } else {
-                eprintln!("Error writing header to {}", ublock_filename);
-                return Err(format!("Failed to write header to {}", ublock_filename).into());
+                eprintln!("Error writing header to {ublock_filename}");
+                return Err(format!("Failed to write header to {ublock_filename}").into());
             }
         }
         Err(e) => {
-            eprintln!("Error creating file {}: {}", ublock_filename, e);
+            eprintln!("Error creating file {ublock_filename}: {e}");
             return Err(e.into());
         }
     }
