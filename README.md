@@ -30,14 +30,24 @@ This list typically contains domains associated with financial fraud or phishing
 
 The script will fetch the latest data from the EMA API and generate (or overwrite) the `hosts_ema.txt` and `hosts_ema_ublock.txt` files in the current directory.
 
+During execution, the script provides detailed progress output, including:
+
+* The current offset of items being fetched from the API.
+* The number of items fetched in each request.
+* The number of new unique hosts added from each batch.
+* The total unique hosts collected so far.
+
+This output helps users understand the data fetching progress and the difference between total items fetched and unique hosts collected.
+
 link to import uBlock Origin
+
 ```bash
 https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/hosts_ema_ublock.txt
 ```
 
 ## Acknowledgments
 
-Thanks for [Ukrainian Interbank Association of Payment Systems Members EMA] (https://ema.com.ua) for this data
+Thanks for [Ukrainian Interbank Association of Payment Systems Members EMA] (<https://ema.com.ua>) for this data
 
 ## License
 
