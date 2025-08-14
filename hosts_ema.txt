@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-08-14 06:24:09 UTC
+# Last modified: 2025-08-14 12:31:48 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1935
+# Number of entries: 1936
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -356,6 +356,7 @@
 0.0.0.0 drama-theatre.fun
 0.0.0.0 dramatheatrua.fun
 0.0.0.0 draw-opros.top
+0.0.0.0 dreamz.icu
 0.0.0.0 ducnl.temugm.com
 0.0.0.0 dufafaststinen.gq
 0.0.0.0 duiuaheki.com
