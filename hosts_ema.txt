@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-08-18 06:25:45 UTC
+# Last modified: 2025-08-18 12:31:58 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1937
+# Number of entries: 1938
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1604,6 +1604,7 @@
 0.0.0.0 tripa-dvisor.org
 0.0.0.0 tris-gos.top
 0.0.0.0 trpayuan.site
+0.0.0.0 trrecruiting.me
 0.0.0.0 trud11.xyz
 0.0.0.0 true-portall3.xyz
 0.0.0.0 trust-gos.top
