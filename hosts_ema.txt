@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-08-19 06:23:05 UTC
+# Last modified: 2025-08-19 12:29:59 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1938
+# Number of entries: 1941
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -675,6 +675,7 @@
 0.0.0.0 likte.club
 0.0.0.0 link-traidcompany.com
 0.0.0.0 linkin.bio
+0.0.0.0 linktr.ee
 0.0.0.0 litebox-ukr.com
 0.0.0.0 lkonlinepersonal.za.com
 0.0.0.0 loanalfa.tech
@@ -1157,6 +1158,7 @@
 0.0.0.0 platizh.com
 0.0.0.0 platizhmob.com
 0.0.0.0 play.google.com
+0.0.0.0 pndauadpmgavsim.rest
 0.0.0.0 pochta.co.ua
 0.0.0.0 pochta1.com
 0.0.0.0 pochta1.eu
@@ -1507,6 +1509,7 @@
 0.0.0.0 standart-pay.com.ua
 0.0.0.0 star-rates-award.brandj.xyz
 0.0.0.0 starbox-terminal.com.ua
+0.0.0.0 starforge.icu
 0.0.0.0 starplivatoon.online
 0.0.0.0 start-auto.kiev.ua
 0.0.0.0 startsmart.com.ua
