@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-08-21 06:32:44 UTC
+# Last modified: 2025-08-21 12:29:52 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1941
+# Number of entries: 1944
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -560,6 +560,7 @@
 0.0.0.0 ibox-city.com.ua
 0.0.0.0 iboyun.net
 0.0.0.0 id-gov-dopomogaoon.one
+0.0.0.0 idgovuadpmgavsim.rest
 0.0.0.0 idtnf.site
 0.0.0.0 igenius.ga
 0.0.0.0 igoog.ru
@@ -904,6 +905,7 @@
 0.0.0.0 offvulkanx.ru
 0.0.0.0 oficialonline.ru
 0.0.0.0 oficialplus.ru
+0.0.0.0 oformyty-zayavku.run
 0.0.0.0 ok-pay.com.ua
 0.0.0.0 okko-bonus.live
 0.0.0.0 okko.website
@@ -1693,6 +1695,7 @@
 0.0.0.0 up2phone.top
 0.0.0.0 uplata24.com
 0.0.0.0 uptophone.top
+0.0.0.0 urbanquill.icu
 0.0.0.0 usainua.net
 0.0.0.0 usasklad.com.ua
 0.0.0.0 usavlogcmpntrade2019.top
