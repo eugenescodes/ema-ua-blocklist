@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-08-22 06:22:48 UTC
+# Last modified: 2025-08-22 12:30:28 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1944
+# Number of entries: 1945
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -466,6 +466,7 @@
 0.0.0.0 galaktika-ua.com
 0.0.0.0 general-box.com
 0.0.0.0 generalservice-ukr.com
+0.0.0.0 gerejatoraja.com
 0.0.0.0 get-ua-comp.cfd
 0.0.0.0 getpay-ua.com
 0.0.0.0 gfc.kiev.ua
