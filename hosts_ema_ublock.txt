@@ -1,10 +1,10 @@
 ! Title: ema.com.ua Blacklist for Adblockers (uBlock Origin, AdGuard, etc.)
 ! Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 ! License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
-! Last modified: 2025-09-01 06:24:09 UTC
+! Last modified: 2025-09-01 12:30:10 UTC
 ! Expires: 1 day (update frequency recommendation)
 ! Sources: https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
-! Number of entries: 1947
+! Number of entries: 1950
 !
 ||0nkassashop.shop^
 ||0nlinepaidlife.shop^
@@ -129,6 +129,7 @@
 ||azimutheshop.com^
 ||babasantji.com^
 ||babycar.od.ua^
+||babyfoodexplorers.com^
 ||back.multistream.space^
 ||badge-gos.top^
 ||bagtop.co.ua^
@@ -1571,6 +1572,7 @@
 ||theatrelive.online^
 ||theatresatir.fun^
 ||thefiniko.com^
+||thisisbeethoven.org^
 ||thoughtfulwear.top^
 ||time-helpers.store^
 ||time24pay.online^
@@ -1701,6 +1703,7 @@
 ||uu-quest.xyz^
 ||uuauq.cn^
 ||uz-gos.top^
+||valerianpartners.com^
 ||varaagamvipcommunity.com^
 ||vegas-x-mirror.online^
 ||verification-receive.pages.dev^
