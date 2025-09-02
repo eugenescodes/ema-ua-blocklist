@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-09-02 06:23:04 UTC
+# Last modified: 2025-09-02 12:29:57 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1950
+# Number of entries: 1951
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1177,6 +1177,7 @@
 0.0.0.0 poluchibilet.online
 0.0.0.0 poluchka.3dss-pays.info
 0.0.0.0 poluchka.nost-pays.shop
+0.0.0.0 pomichprosto25.icu
 0.0.0.0 popilkushka.top
 0.0.0.0 poplnialka.biz.ua
 0.0.0.0 popolkanka.top
