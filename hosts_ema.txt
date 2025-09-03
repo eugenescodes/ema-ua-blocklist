@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-09-03 06:21:27 UTC
+# Last modified: 2025-09-03 12:29:12 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1951
+# Number of entries: 1953
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -319,6 +319,7 @@
 0.0.0.0 dear-gos.top
 0.0.0.0 delivvery-uaa.shop
 0.0.0.0 delliveryy.olxtne.workers.dev
+0.0.0.0 denghellpingua.up.railway.app
 0.0.0.0 designp.org
 0.0.0.0 detskiykvartal.uk
 0.0.0.0 diia-gov.pp.ua
@@ -1639,6 +1640,7 @@
 0.0.0.0 ualenukrgo.pages.dev
 0.0.0.0 uamovieonlinejobs.com
 0.0.0.0 uanexthelp.pages.dev
+0.0.0.0 uaonlinezayvka.run
 0.0.0.0 uapay.escrowbox.website
 0.0.0.0 uapdvkomp.yolasite.com
 0.0.0.0 uappl.org
