@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-09-19 12:29:11 UTC
+# Last modified: 2025-09-19 18:20:45 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1953
+# Number of entries: 1954
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1659,6 +1659,7 @@
 0.0.0.0 ukr.reg-dostavka.workers.dev
 0.0.0.0 ukraine-furniture.com.ua
 0.0.0.0 ukraine-payment.com.ua
+0.0.0.0 ukraine.brushsmile.shop
 0.0.0.0 ukraineamazon.com
 0.0.0.0 ukrainedrama.fun
 0.0.0.0 ukraineebay.vip
