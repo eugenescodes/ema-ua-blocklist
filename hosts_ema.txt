@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-09-22 06:23:11 UTC
+# Last modified: 2025-09-22 12:29:25 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1954
+# Number of entries: 1955
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1842,6 +1842,7 @@
 0.0.0.0 www.jinyuan.xin
 0.0.0.0 www.kassirticket.art
 0.0.0.0 www.kia-avto.com.ua
+0.0.0.0 www.lazadanet.vip
 0.0.0.0 www.lendlok.com
 0.0.0.0 www.letiletiavia.site
 0.0.0.0 www.letiudobnoavia.site
