@@ -2,7 +2,7 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-11-28 18:22:39 UTC
+# Last modified: 2025-11-29 01:07:31 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
