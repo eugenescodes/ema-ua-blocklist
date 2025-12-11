@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-12-11 06:27:10 UTC
+# Last modified: 2025-12-11 12:34:10 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1956
+# Number of entries: 1957
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -635,6 +635,7 @@
 0.0.0.0 kids-balet-golos.kyiv.ua
 0.0.0.0 kiev-favorit.com
 0.0.0.0 kievfinance-ukr.com
+0.0.0.0 kievstar.live
 0.0.0.0 kievstar.online
 0.0.0.0 kievstar.org
 0.0.0.0 king-electronik.com
