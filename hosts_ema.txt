@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2025-12-15 01:15:11 UTC
+# Last modified: 2025-12-15 06:28:28 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1957
+# Number of entries: 1958
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1957,6 +1957,7 @@
 0.0.0.0 zarakhuvannya13200.com
 0.0.0.0 zarydunaperemogu.click
 0.0.0.0 zavkaotrymkapodannya.life
+0.0.0.0 zayavazvonfionline.icu
 0.0.0.0 ze-dopomoga.me
 0.0.0.0 zemalua.ru
 0.0.0.0 zentoora.site
