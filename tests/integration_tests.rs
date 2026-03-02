@@ -4,7 +4,6 @@
 // Replace 'ema_ua_blocklist' if your package name in Cargo.toml is different.
 use ema_ua_blocklist::fetch_all_hosts;
 
-use mockito;
 use std::collections::HashSet;
 
 // create a HashSet from a slice of strings for easier comparison
