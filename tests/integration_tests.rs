@@ -2,7 +2,7 @@
 
 // Import items from the main binary crate.
 // Replace 'ema_ua_blocklist' if your package name in Cargo.toml is different.
-use ema_ua_blocklist::{fetch_all_hosts, extract_and_validate_host};
+use ema_ua_blocklist::fetch_all_hosts;
 
 use mockito;
 use std::collections::HashSet;
@@ -17,7 +17,7 @@ async fn test_fetch_successful_pagination() {
     let mut server = mockito::Server::new_async().await;
     let base_url = server.url();
     let user_agent = "test-agent";
-    let page_size = 2; 
+    let page_size = 2;
 
     // Mock first page request (offset=0)
     let mock1 = server
@@ -170,7 +170,6 @@ async fn test_fetch_stops_on_short_page() {
         .with_body(r#"{"data": [{"url":"http://item1.com"},{"url":"item2.net"}]}"#) // Only 2 items returned
         .create_async()
         .await;
-
 
     let result = fetch_all_hosts(&base_url, user_agent, page_size).await;
 
