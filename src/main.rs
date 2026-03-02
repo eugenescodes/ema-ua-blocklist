@@ -115,12 +115,11 @@ pub async fn fetch_all_hosts(client: &Client) -> Result<HashSet<String>, FetchEr
 
         let mut new_hosts_count = 0;
         for item in &api_response.data {
-            if let Some(url_str) = &item.url {
-                if let Some(host) = extract_and_validate_host(url_str) {
-                    if all_hosts.insert(host) {
-                        new_hosts_count += 1;
-                    }
-                }
+            if let Some(url_str) = &item.url
+                && let Some(host) = extract_and_validate_host(url_str)
+                && all_hosts.insert(host)
+            {
+                new_hosts_count += 1;
             }
         }
 
