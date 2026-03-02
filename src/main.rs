@@ -257,7 +257,6 @@ async fn main() -> Result<(), FetchError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json;
 
     #[test]
     fn test_deserialize_api_response() {
