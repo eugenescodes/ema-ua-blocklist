@@ -84,8 +84,8 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
 
-      - name: Run doc tests
-        run: cargo test --doc
+      # - name: Run doc tests
+      #   run: cargo test --doc
 
       # --- fast check docker with GHA-cache ---
       - name: Set up Docker Buildx
