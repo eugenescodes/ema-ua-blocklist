@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-05-06 08:03:23 UTC
+# Last modified: 2026-05-06 13:23:29 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1961
+# Number of entries: 1962
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -464,6 +464,7 @@
 0.0.0.0 fs-system.ru
 0.0.0.0 fumeky.xyz
 0.0.0.0 funpay.ru
+0.0.0.0 future-connect-5g.com
 0.0.0.0 fxclub.site
 0.0.0.0 fxprime365.com
 0.0.0.0 galaktika-ua.com
