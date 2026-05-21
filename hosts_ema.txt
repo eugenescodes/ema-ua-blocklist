@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-05-21 08:51:30 UTC
+# Last modified: 2026-05-21 14:34:09 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1966
+# Number of entries: 1968
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1570,6 +1570,7 @@
 0.0.0.0 technolend.com.ua
 0.0.0.0 technotrader.com.ua
 0.0.0.0 techport.net.ua
+0.0.0.0 techroom.com.ua
 0.0.0.0 teh24.com.ua
 0.0.0.0 tehniksplus.com.ua
 0.0.0.0 tehnotop.net.ua
@@ -1747,6 +1748,7 @@
 0.0.0.0 vsad.com.ua
 0.0.0.0 vulkanslots.online
 0.0.0.0 vyplataua.com
+0.0.0.0 wab.zoccokas.com
 0.0.0.0 wbtheaterchain.vip
 0.0.0.0 wdcfsfsfgbs.com
 0.0.0.0 wealthinnovations.cfd

@@ -1,10 +1,10 @@
 ! Title: ema.com.ua Blacklist for Adblockers (uBlock Origin, AdGuard, etc.)
 ! Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 ! License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
-! Last modified: 2026-05-21 08:51:30 UTC
+! Last modified: 2026-05-21 14:34:09 UTC
 ! Expires: 1 day (update frequency recommendation)
 ! Sources: https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
-! Number of entries: 1966
+! Number of entries: 1968
 !
 ||0nkassashop.shop^
 ||0nlinepaidlife.shop^
@@ -1565,6 +1565,7 @@
 ||technolend.com.ua^
 ||technotrader.com.ua^
 ||techport.net.ua^
+||techroom.com.ua^
 ||teh24.com.ua^
 ||tehniksplus.com.ua^
 ||tehnotop.net.ua^
@@ -1742,6 +1743,7 @@
 ||vsad.com.ua^
 ||vulkanslots.online^
 ||vyplataua.com^
+||wab.zoccokas.com^
 ||wbtheaterchain.vip^
 ||wdcfsfsfgbs.com^
 ||wealthinnovations.cfd^
