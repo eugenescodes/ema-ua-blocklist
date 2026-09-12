@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy only the compiled binary and config file
-COPY --from=builder /app/ema-ua-blocklist /app/ema-ua-blocklist
+COPY --from=builder /app/target/release/ema-ua-blocklist /app/ema-ua-blocklist
 
 # Run the binary
 CMD ["/app/ema-ua-blocklist"]
