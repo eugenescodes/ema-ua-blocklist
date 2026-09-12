@@ -19,8 +19,7 @@ COPY src ./src
 RUN cargo build --release --locked
 
 # Strip symbols and stage the binary for the runtime stage.
-RUN strip target/release/ema-ua-blocklist \
- && cp target/release/ema-ua-blocklist
+RUN strip target/release/ema-ua-blocklist
 
 # ---------- Runtime stage ----------
 FROM debian:stable-slim
