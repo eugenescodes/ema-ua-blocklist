@@ -11,13 +11,48 @@ const LICENSE_FILE: &str = "LICENSE";
 const HOSTS_FILENAME: &str = "hosts_ema.txt";
 const UBLOCK_FILENAME: &str = "hosts_ema_ublock.txt";
 
-fn write_hosts_file(hosts: &[String]) -> Result<(), FetchError> {
-    let homepage_url = format!("https://github.com/eugenescodes/{REPO_NAME}");
-    let license_url =
-        format!("https://github.com/eugenescodes/{REPO_NAME}/blob/main/{LICENSE_FILE}",);
-    let source_description = "ema.com.ua Blacklist API";
-    let timestamp_str = Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string();
+struct HeaderMeta {
+    homepage_url: String,
+    license_url: String,
+    source_description: &'static str,
+    timestamp_str: String,
+}
 
+impl HeaderMeta {
+    fn now() -> Self {
+        Self {
+            homepage_url: format!("https://github.com/eugenescodes/{REPO_NAME}"),
+            license_url: format!(
+                "https://github.com/eugenescodes/{REPO_NAME}/blob/main/{LICENSE_FILE}"
+            ),
+            source_description: "ema.com.ua Blacklist API",
+            timestamp_str: Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string(),
+        }
+    }
+}
+
+fn write_blocklist(
+    filename: &str,
+    header: &str,
+    hosts: &[String],
+    prefix: &str,
+    suffix: &str,
+) -> Result<(), FetchError> {
+    let file = File::create(filename)?;
+    let mut writer = BufWriter::new(file);
+
+    writer.write_all(header.as_bytes())?;
+    for host in hosts {
+        writeln!(writer, "{prefix}{host}{suffix}")?;
+    }
+    writer.flush()?;
+
+    println!("Successfully wrote {filename}");
+    Ok(())
+}
+
+fn write_hosts_file(hosts: &[String]) -> Result<(), FetchError> {
+    let meta = HeaderMeta::now();
     let header = format!(
         r#"# Title: Blocklist from {} for DNS-level blocking (e.g., hosts file, Pi-hole)
 # Homepage: {}
@@ -33,35 +68,20 @@ fn write_hosts_file(hosts: &[String]) -> Result<(), FetchError> {
 #
 # Source:
 "#,
-        source_description,
-        homepage_url,
-        license_url,
-        timestamp_str,
+        meta.source_description,
+        meta.homepage_url,
+        meta.license_url,
+        meta.timestamp_str,
         BASE_API_URL,
-        source_description,
+        meta.source_description,
         hosts.len()
     );
 
-    let file = File::create(HOSTS_FILENAME)?;
-    let mut writer = BufWriter::new(file);
-
-    writer.write_all(header.as_bytes())?;
-    for host in hosts {
-        writeln!(writer, "0.0.0.0 {host}")?;
-    }
-    writer.flush()?;
-
-    println!("Successfully wrote {HOSTS_FILENAME}");
-    Ok(())
+    write_blocklist(HOSTS_FILENAME, &header, hosts, "0.0.0.0 ", "")
 }
 
 fn write_ublock_file(hosts: &[String]) -> Result<(), FetchError> {
-    let homepage_url = format!("https://github.com/eugenescodes/{REPO_NAME}");
-    let license_url =
-        format!("https://github.com/eugenescodes/{REPO_NAME}/blob/main/{LICENSE_FILE}",);
-    let source_description = "ema.com.ua Blacklist API";
-    let timestamp_str = Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string();
-
+    let meta = HeaderMeta::now();
     let header = format!(
         r#"! Title: ema.com.ua Blacklist for Adblockers (uBlock Origin, AdGuard, etc.)
 ! Homepage: {}
@@ -72,25 +92,15 @@ fn write_ublock_file(hosts: &[String]) -> Result<(), FetchError> {
 ! Number of entries: {}
 !
 "#,
-        homepage_url,
-        license_url,
-        timestamp_str,
+        meta.homepage_url,
+        meta.license_url,
+        meta.timestamp_str,
         BASE_API_URL,
-        source_description,
+        meta.source_description,
         hosts.len()
     );
 
-    let file = File::create(UBLOCK_FILENAME)?;
-    let mut writer = BufWriter::new(file);
-
-    writer.write_all(header.as_bytes())?;
-    for host in hosts {
-        writeln!(writer, "||{host}^")?;
-    }
-    writer.flush()?;
-
-    println!("Successfully wrote {UBLOCK_FILENAME}");
-    Ok(())
+    write_blocklist(UBLOCK_FILENAME, &header, hosts, "||", "^")
 }
 
 #[tokio::main]

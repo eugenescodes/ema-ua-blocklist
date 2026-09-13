@@ -11,12 +11,8 @@ pub const SOURCE_DOMAIN_2: &str = "www.ema.com.ua";
 pub enum FetchError {
     #[error("HTTP request failed: {0}")]
     HttpRequest(#[from] reqwest::Error),
-    #[error("JSON deserialization failed: {0}")]
-    JsonDeserialization(#[from] serde_json::Error),
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-    #[error("API returned unsuccessful status: {0}")]
-    ApiStatus(reqwest::StatusCode),
     #[error("{0}")]
     Unexpected(String),
 }
@@ -57,31 +53,18 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
         format!("http://{trimmed}")
     };
 
-    if let Ok(parsed_url) = Url::parse(&url_to_parse) {
-        if !matches!(parsed_url.scheme(), "http" | "https") {
-            return None;
-        }
-        if let Some(host) = parsed_url.host_str() {
-            if !host.contains('.') {
-                return None;
-            }
-            let host_lower = host.to_lowercase();
-            if host_lower != SOURCE_DOMAIN_1 && host_lower != SOURCE_DOMAIN_2 {
-                return Some(host_lower);
-            }
-        }
-    } else if !trimmed.contains(' ')
-        && !trimmed.starts_with('/')
-        && !trimmed.contains("://")
-        && trimmed.contains('.')
-    {
-        let host_lower = trimmed.to_lowercase();
-        if host_lower != SOURCE_DOMAIN_1 && host_lower != SOURCE_DOMAIN_2 {
-            return Some(host_lower);
-        }
+    let parsed_url = Url::parse(&url_to_parse).ok()?;
+    if !matches!(parsed_url.scheme(), "http" | "https") {
+        return None;
     }
 
-    None
+    let host = parsed_url.host_str()?;
+    if !host.contains('.') {
+        return None;
+    }
+
+    let host_lower = host.to_lowercase();
+    (host_lower != SOURCE_DOMAIN_1 && host_lower != SOURCE_DOMAIN_2).then_some(host_lower)
 }
 
 /// Fetches all hostnames from the EMA API using pagination.
