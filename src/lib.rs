@@ -116,13 +116,8 @@ pub async fn fetch_all_hosts(
     loop {
         println!("Fetching data from offset: {offset}");
 
-        // setup URL for mockito (path /?offset=X) and real API
-        let api_url =
-            if base_url.starts_with("http://127.0.0.1") || base_url.contains("non-existent") {
-                format!("{base_url}/?offset={offset}")
-            } else {
-                format!("{base_url}?offset={offset}")
-            };
+        let separator = if base_url.contains('?') { '&' } else { '?' };
+        let api_url = format!("{base_url}{separator}offset={offset}");
 
         let response = match client.get(&api_url).send().await {
             Ok(resp) => resp,

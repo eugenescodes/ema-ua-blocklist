@@ -108,7 +108,7 @@ async fn test_fetch_api_error_status() {
     // Check the error message content
     let error_message = result.err().unwrap().to_string();
     assert!(error_message.contains("Error: Failed to fetch API (Status: 500"));
-    assert!(error_message.contains(&format!("URL: {}/?offset=0", base_url))); // Check URL is part of the error
+    assert!(error_message.contains(&format!("URL: {}?offset=0", base_url))); // Check URL is part of the error
 }
 
 #[tokio::test]

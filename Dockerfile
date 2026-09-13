@@ -29,10 +29,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /output
 
-# Copy only the compiled binary and config file
+# Copy only the compiled binary
 COPY --from=builder /app/target/release/ema-ua-blocklist /app/ema-ua-blocklist
 
-# Run the binary
+# Generated blocklists land in the working directory (/output).
+# Mount a host directory there to collect them:
+#   docker run --rm -v "$(pwd)":/output ema-ua-blocklist
 ENTRYPOINT ["/app/ema-ua-blocklist"]

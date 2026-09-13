@@ -110,8 +110,8 @@ async fn main() -> Result<(), FetchError> {
     let mut sorted_hosts: Vec<String> = all_hosts.into_iter().collect();
     sorted_hosts.sort_unstable();
 
-    let _ = write_hosts_file(&sorted_hosts);
-    let _ = write_ublock_file(&sorted_hosts);
+    write_hosts_file(&sorted_hosts)?;
+    write_ublock_file(&sorted_hosts)?;
 
     println!("\nScript finished successfully.");
     Ok(())
