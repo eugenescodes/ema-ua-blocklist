@@ -27,9 +27,6 @@ FROM debian:stable-slim
 # Install only required system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
-    libssl3 \
-    curl \
-    wget \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -38,4 +35,4 @@ WORKDIR /app
 COPY --from=builder /app/target/release/ema-ua-blocklist /app/ema-ua-blocklist
 
 # Run the binary
-CMD ["/app/ema-ua-blocklist"]
+ENTRYPOINT ["/app/ema-ua-blocklist"]
