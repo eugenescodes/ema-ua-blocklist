@@ -176,7 +176,7 @@ mod tests {
         let json_data = r#"{"data": [{"url":"https://e1.com"},{"url":"http://e2.net"}]}"#;
         let parsed: Result<ApiResponse, _> = serde_json::from_str(json_data);
         assert!(parsed.is_ok());
-        let api_response = parsed.expect("Failed to parse API response");
+        let api_response = parsed.unwrap_or_else(|_| ApiResponse { data: vec![] });
         assert_eq!(api_response.data.len(), 2);
         assert_eq!(
             api_response.data[0].url,
@@ -193,7 +193,7 @@ mod tests {
         let json_data = r#"{"data": []}"#;
         let parsed: Result<ApiResponse, _> = serde_json::from_str(json_data);
         assert!(parsed.is_ok());
-        let api_response = parsed.expect("Failed to parse empty API response");
+        let api_response = parsed.unwrap_or_else(|_| ApiResponse { data: vec![] });
         assert!(api_response.data.is_empty());
     }
 
