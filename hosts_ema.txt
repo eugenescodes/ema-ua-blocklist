@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-09-29 21:34:58 UTC
+# Last modified: 2026-09-30 11:27:39 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1969
+# Number of entries: 1970
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1514,6 +1514,7 @@
 0.0.0.0 socprofile.com
 0.0.0.0 soctrud.com
 0.0.0.0 sofly.trange.workers.dev
+0.0.0.0 softexa.name
 0.0.0.0 softmax.co.ua
 0.0.0.0 some-gos.top
 0.0.0.0 sove-gos.top
