@@ -1,8 +1,7 @@
 name: Pipeline
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,27 +22,57 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # ─────────────────────────────────────────────
-  # JOB 1: BUILD, FORMAT & TEST (Run only on Push/PR/Dispatch)
-  # ─────────────────────────────────────────────
-  build:
-    if: github.event_name != 'schedule'
+  format-and-commit:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Auto-format code
+        run: cargo fmt --all
+
+      - name: Commit and push formatting
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          export GIT_MERGE_AUTOEDIT=no
+          export GIT_TERMINAL_PROMPT=0
+          AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -u
+            git commit -m "Auto-fix formatting (cargo fmt)"
+            git -c http.https://github.com/.extraheader="$AUTH_HEADER" pull --rebase --no-edit origin "$BRANCH_NAME"
+            git -c http.https://github.com/.extraheader="$AUTH_HEADER" push origin "HEAD:refs/heads/$BRANCH_NAME"
+          else
+            echo "No formatting changes to commit."
+          fi
+
+  build:
+    if: ${{ always() && github.event_name != 'schedule' && needs.format-and-commit.result != 'failure' && needs.format-and-commit.result != 'cancelled' }}
+    needs: [format-and-commit]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref || github.ref_name }}
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
+          ref: ${{ github.event_name == 'push' && github.ref_name || github.sha }}
+          persist-credentials: false
 
       - name: Cache cargo registry
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/bin/
@@ -51,32 +80,12 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('rust-toolchain.toml', '**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Auto-format code
-        run: cargo fmt --all
-
-      - name: Commit and push formatting
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          export GIT_MERGE_AUTOEDIT=no
-          export GIT_TERMINAL_PROMPT=0
-
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "Auto-fix formatting (cargo fmt)"
-            git pull --rebase --no-edit origin "$BRANCH_NAME"
-            git push origin "HEAD:refs/heads/$BRANCH_NAME"
-          else
-            echo "No formatting changes to commit."
-          fi
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
@@ -89,10 +98,10 @@ jobs:
 
       # --- fast check docker with GHA-cache ---
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Build Docker Image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           push: false
@@ -108,24 +117,18 @@ jobs:
   # JOB 2: UPDATE HOSTS (Run only on Schedule or Dispatch)
   # ─────────────────────────────────────────────
   update-hosts:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
-
-      - name: Configure git identity
-        run: |
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
+          persist-credentials: false
 
       - name: Cache cargo registry
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/bin/
@@ -133,20 +136,60 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-cron-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-cron-${{ hashFiles('rust-toolchain.toml', '**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-cron-
 
       - name: Run conversion script
         run: cargo run --release
 
-      - name: Commit and push hosts lists
+      - name: Upload generated hosts lists
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: generated-hosts-${{ github.run_id }}
+          path: |
+            hosts_ema.txt
+            hosts_ema_ublock.txt
+          if-no-files-found: error
+          retention-days: 1
+
+  commit-hosts:
+    needs: [update-hosts]
+    if: needs.update-hosts.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download generated hosts lists
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: generated-hosts-${{ github.run_id }}
+          path: generated-hosts
+
+      - name: Configure git identity
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push hosts lists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export GIT_TERMINAL_PROMPT=0
+          AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          cp generated-hosts/hosts_ema.txt generated-hosts/hosts_ema_ublock.txt .
           if [[ -n $(git status --porcelain hosts_ema.txt hosts_ema_ublock.txt) ]]; then
             git add hosts_ema.txt hosts_ema_ublock.txt
             git commit -m "Update blocklist files via schedule"
-            git pull --rebase origin main
-            git push origin main
+            git -c http.https://github.com/.extraheader="$AUTH_HEADER" pull --rebase origin main
+            git -c http.https://github.com/.extraheader="$AUTH_HEADER" push origin main
           else
             echo "No changes to commit."
           fi
