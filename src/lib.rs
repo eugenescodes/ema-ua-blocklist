@@ -27,6 +27,23 @@ pub struct ApiResponse {
     pub data: Vec<BlacklistItem>,
 }
 
+fn is_allowed_api_url(url: &Url) -> bool {
+    match url.scheme() {
+        "https" => true,
+        // Local HTTP is reserved for loopback mock servers; public API URLs must use TLS.
+        "http" => {
+            matches!(url.host(), Some(url::Host::Ipv4(ip)) if ip.is_loopback())
+                || matches!(url.host(), Some(url::Host::Ipv6(ip)) if ip.is_loopback())
+        }
+        _ => false,
+    }
+}
+
+fn is_allowed_redirect(previous: &[Url], next: &Url) -> bool {
+    is_allowed_api_url(next)
+        && !(previous.iter().any(|url| url.scheme() == "https") && next.scheme() != "https")
+}
+
 /// Extracts and validates a hostname from a given URL string.
 ///
 /// # Examples
@@ -67,7 +84,9 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
     (host_lower != SOURCE_DOMAIN_1 && host_lower != SOURCE_DOMAIN_2).then_some(host_lower)
 }
 
-/// Fetches all hostnames from the EMA API using pagination.
+/// Fetches all hostnames from the API using pagination.
+///
+/// The API URL must use HTTPS. HTTP is permitted only for loopback addresses, such as local test servers.
 ///
 /// # Examples
 ///
@@ -88,9 +107,24 @@ pub async fn fetch_all_hosts(
     user_agent: &str,
     page_size: usize,
 ) -> Result<HashSet<String>, FetchError> {
+    let parsed_base_url = Url::parse(base_url)
+        .map_err(|error| FetchError::Unexpected(format!("Error: Invalid API URL: {error}")))?;
+    if !is_allowed_api_url(&parsed_base_url) {
+        return Err(FetchError::Unexpected(format!(
+            "Error: API URL must use HTTPS (HTTP is allowed only for loopback): {base_url}"
+        )));
+    }
+
     let client = Client::builder()
         .user_agent(user_agent)
         .timeout(std::time::Duration::from_secs(30))
+        .redirect(reqwest::redirect::Policy::custom(|attempt| {
+            if is_allowed_redirect(attempt.previous(), attempt.url()) {
+                attempt.follow()
+            } else {
+                attempt.stop()
+            }
+        }))
         .build()?;
 
     let mut all_hosts = HashSet::new();
@@ -170,6 +204,29 @@ pub async fn fetch_all_hosts(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_api_url_scheme_validation() {
+        assert!(is_allowed_api_url(
+            &Url::parse("https://api.example.com").unwrap()
+        ));
+        assert!(is_allowed_api_url(
+            &Url::parse("http://127.0.0.1:8080").unwrap()
+        ));
+        assert!(is_allowed_api_url(
+            &Url::parse("http://[::1]:8080").unwrap()
+        ));
+        assert!(!is_allowed_api_url(
+            &Url::parse("http://api.example.com").unwrap()
+        ));
+        assert!(!is_allowed_api_url(
+            &Url::parse("ftp://api.example.com").unwrap()
+        ));
+        assert!(!is_allowed_redirect(
+            &[Url::parse("https://api.example.com").unwrap()],
+            &Url::parse("http://127.0.0.1:8080").unwrap(),
+        ));
+    }
 
     #[test]
     fn test_deserialize_api_response() {

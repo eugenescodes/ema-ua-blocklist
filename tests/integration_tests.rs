@@ -142,7 +142,7 @@ async fn test_fetch_invalid_json_response() {
 
 #[tokio::test]
 async fn test_fetch_network_error() {
-    let base_url = "http://non-existent-domain-for-rust-test.local";
+    let base_url = "https://127.0.0.1:0";
     let user_agent = "test-agent";
     let page_size = 10;
 
