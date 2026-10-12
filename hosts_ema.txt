@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-10-12 13:39:02 UTC
+# Last modified: 2026-10-12 23:53:01 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1972
+# Number of entries: 1973
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -832,6 +832,7 @@
 0.0.0.0 my-gov.uperevod.icu
 0.0.0.0 my-gov.uplata.cyou
 0.0.0.0 my-gov.uvyplata.icu
+0.0.0.0 myclik.tech
 0.0.0.0 mycvsearch.com
 0.0.0.0 myfrlathome.net
 0.0.0.0 mymobile.in.ua
