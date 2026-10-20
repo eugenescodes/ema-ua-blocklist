@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-10-20 02:14:27 UTC
+# Last modified: 2026-10-20 10:31:08 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1973
+# Number of entries: 1974
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1666,6 +1666,7 @@
 0.0.0.0 ubi-investments.com
 0.0.0.0 ubi.investments
 0.0.0.0 ukawar.art.blog
+0.0.0.0 ukr-childs.basting.world
 0.0.0.0 ukr-help.online
 0.0.0.0 ukr-money.com.ua
 0.0.0.0 ukr-one.xyz
