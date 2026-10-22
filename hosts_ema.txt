@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-10-21 21:01:16 UTC
+# Last modified: 2026-10-22 10:46:40 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1975
+# Number of entries: 1976
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1354,6 +1354,7 @@
 0.0.0.0 prom.ua.snasty.shop
 0.0.0.0 promo-list.com
 0.0.0.0 prostosite.com.ua
+0.0.0.0 puls-moto.com.ua
 0.0.0.0 pumb-24.su
 0.0.0.0 pumb-monitoring.info
 0.0.0.0 pumb.3dss-pays.info
