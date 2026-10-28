@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-10-28 02:41:08 UTC
+# Last modified: 2026-10-28 11:47:09 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1979
+# Number of entries: 1980
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -824,6 +824,7 @@
 0.0.0.0 moshoper.in.ua
 0.0.0.0 moskassaplus.shop
 0.0.0.0 mospaidsmarket.top
+0.0.0.0 motofun.com.ua
 0.0.0.0 motohouseua.com
 0.0.0.0 moun.vilpataua-helpssoc.za.com
 0.0.0.0 msneu.com
