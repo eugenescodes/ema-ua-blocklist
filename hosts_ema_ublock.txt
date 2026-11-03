@@ -1,10 +1,10 @@
 ! Title: ema.com.ua Blacklist for Adblockers (uBlock Origin, AdGuard, etc.)
 ! Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 ! License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
-! Last modified: 2026-11-03 00:09:21 UTC
+! Last modified: 2026-11-03 13:07:03 UTC
 ! Expires: 1 day (update frequency recommendation)
 ! Sources: https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
-! Number of entries: 1982
+! Number of entries: 1983
 !
 ||0nkassashop.shop^
 ||0nlinepaidlife.shop^
@@ -107,6 +107,7 @@
 ||atb-bonus.com^
 ||atb-market.space^
 ||atbmarket.life^
+||atbmi.onrender.com^
 ||atkassa24.top^
 ||atlasbank.cc^
 ||auctionbaggage.com^

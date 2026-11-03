@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-03 00:09:21 UTC
+# Last modified: 2026-11-03 13:07:03 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1982
+# Number of entries: 1983
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -112,6 +112,7 @@
 0.0.0.0 atb-bonus.com
 0.0.0.0 atb-market.space
 0.0.0.0 atbmarket.life
+0.0.0.0 atbmi.onrender.com
 0.0.0.0 atkassa24.top
 0.0.0.0 atlasbank.cc
 0.0.0.0 auctionbaggage.com
