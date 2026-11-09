@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-09 03:07:22 UTC
+# Last modified: 2026-11-09 14:28:15 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1984
+# Number of entries: 1986
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -841,6 +841,7 @@
 0.0.0.0 myclik.tech
 0.0.0.0 mycvsearch.com
 0.0.0.0 myfrlathome.net
+0.0.0.0 myklic.cc
 0.0.0.0 mymobile.in.ua
 0.0.0.0 mymoneypay.ulcraft.com
 0.0.0.0 mypay.co.ua
@@ -1525,6 +1526,7 @@
 0.0.0.0 sofly.trange.workers.dev
 0.0.0.0 softex.beauty
 0.0.0.0 softex.it.com
+0.0.0.0 softex.skin
 0.0.0.0 softex.watch
 0.0.0.0 softexa.name
 0.0.0.0 softexe.site
