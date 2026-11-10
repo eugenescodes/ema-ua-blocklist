@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-10 00:55:54 UTC
+# Last modified: 2026-11-10 13:52:42 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1986
+# Number of entries: 1987
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1861,6 +1861,7 @@
 0.0.0.0 www.growthstrategyinstitute.com
 0.0.0.0 www.gsmpay.in.ua
 0.0.0.0 www.gsmtime.in.ua
+0.0.0.0 www.handmaade.net
 0.0.0.0 www.happeuphoria.com
 0.0.0.0 www.holding-pay.com.ua
 0.0.0.0 www.imex-pay.com.ua
