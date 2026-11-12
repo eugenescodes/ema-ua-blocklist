@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-12 04:26:17 UTC
+# Last modified: 2026-11-12 14:04:53 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1988
+# Number of entries: 1989
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -265,6 +265,7 @@
 0.0.0.0 centrprices.shop
 0.0.0.0 cerv-gos.top
 0.0.0.0 ceshex.com
+0.0.0.0 changemyminds.com
 0.0.0.0 cheap-gos.top
 0.0.0.0 checkmoney.com.ua
 0.0.0.0 chekmobile.in.ua
