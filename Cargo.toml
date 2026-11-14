@@ -2,6 +2,7 @@
 name = "ema-ua-blocklist"
 version = "0.1.0"
 edition = "2024"
+license = "GPL-3.0-only"
 
 [dependencies]
 reqwest = { version = "0.13.4", features = ["json"] }
@@ -11,6 +12,8 @@ url = "2.5.8"
 tokio = { version = "1.52.3", features = ["full"] }
 chrono = { version = "0.4.45", features = ["serde"] }
 thiserror = "2.0.18"
+httpdate = "1.0.3"
+fastrand = "2.5.0"
 
 [dev-dependencies]
 mockito = "1.7.2"

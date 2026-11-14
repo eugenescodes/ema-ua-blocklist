@@ -6,6 +6,7 @@ use url::Url;
 
 const MAX_REQUEST_RETRIES: u32 = 3;
 const INITIAL_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(250);
+const MAX_RETRY_DELAY: std::time::Duration = std::time::Duration::from_secs(30);
 
 pub const SOURCE_DOMAIN_1: &str = "ema.com.ua";
 pub const SOURCE_DOMAIN_2: &str = "www.ema.com.ua";
@@ -14,7 +15,7 @@ pub const SOURCE_DOMAIN_2: &str = "www.ema.com.ua";
 pub enum FetchError {
     #[error("HTTP request failed: {0}")]
     HttpRequest(#[from] reqwest::Error),
-    #[error("Network request failed for {url} after retries: {source}")]
+    #[error("Network request failed for {url}: {source}")]
     Request {
         url: String,
         #[source]
@@ -34,6 +35,12 @@ pub struct BlacklistItem {
 #[derive(Deserialize, Debug)]
 pub struct ApiResponse {
     pub data: Vec<BlacklistItem>,
+}
+
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct BlacklistEntries {
+    pub hosts: HashSet<String>,
+    pub ips: HashSet<std::net::IpAddr>,
 }
 
 fn is_allowed_api_url(url: &Url) -> bool {
@@ -57,14 +64,119 @@ fn is_retryable_status(status: reqwest::StatusCode) -> bool {
     status.is_server_error() || status == reqwest::StatusCode::TOO_MANY_REQUESTS
 }
 
-fn retry_delay(retry_number: u32) -> std::time::Duration {
-    INITIAL_RETRY_DELAY * 2u32.pow(retry_number)
+fn is_retryable_request_error(error: &reqwest::Error) -> bool {
+    error.is_timeout() || error.is_connect() || error.is_body()
+}
+
+fn is_retryable_body_error(error: &reqwest::Error) -> bool {
+    is_retryable_request_error(error)
+        || (error.is_decode() && error.status().is_some_and(|status| status.is_success()))
+}
+
+fn exponential_retry_delay(retry_number: u32) -> std::time::Duration {
+    INITIAL_RETRY_DELAY
+        .saturating_mul(2u32.saturating_pow(retry_number))
+        .min(MAX_RETRY_DELAY)
+}
+
+fn retry_after_delay(
+    value: Option<&reqwest::header::HeaderValue>,
+    now: std::time::SystemTime,
+) -> Option<std::time::Duration> {
+    let value = value?.to_str().ok()?.trim();
+
+    if let Ok(seconds) = value.parse::<u64>() {
+        return Some(std::time::Duration::from_secs(seconds).min(MAX_RETRY_DELAY));
+    }
+
+    let retry_at = httpdate::parse_http_date(value).ok()?;
+    Some(
+        retry_at
+            .duration_since(now)
+            .unwrap_or_default()
+            .min(MAX_RETRY_DELAY),
+    )
+}
+
+fn jittered_retry_delay(
+    retry_number: u32,
+    retry_after: Option<&reqwest::header::HeaderValue>,
+    now: std::time::SystemTime,
+    random_sample: u64,
+) -> std::time::Duration {
+    if let Some(delay) = retry_after_delay(retry_after, now) {
+        return delay;
+    }
+
+    let ceiling = exponential_retry_delay(retry_number).as_millis() as u64;
+    let lower_bound = (ceiling / 2).max(1);
+    let jitter_millis = lower_bound + random_sample % (ceiling - lower_bound + 1);
+    std::time::Duration::from_millis(jitter_millis)
+}
+
+fn normalize_url_entry(value: &str) -> String {
+    value
+        .chars()
+        .filter(|character| !matches!(*character, '\u{200B}'..='\u{200D}' | '\u{FEFF}'))
+        .collect::<String>()
+        .trim()
+        .trim_matches('.')
+        .to_string()
+}
+
+fn extract_ip_from_url(value: &str) -> Option<std::net::IpAddr> {
+    let normalized = normalize_url_entry(value);
+    if normalized.is_empty() {
+        return None;
+    }
+
+    let url_to_parse = if normalized.contains("://") {
+        normalized
+    } else {
+        format!("http://{normalized}")
+    };
+    let parsed_url = Url::parse(&url_to_parse).ok()?;
+    if !matches!(parsed_url.scheme(), "http" | "https") {
+        return None;
+    }
+
+    match parsed_url.host()? {
+        url::Host::Ipv4(ip) => Some(ip.into()),
+        url::Host::Ipv6(ip) => Some(ip.into()),
+        url::Host::Domain(_) => None,
+    }
+}
+
+fn is_valid_hostname(host: &str) -> bool {
+    if host.is_empty() || host.len() > 253 || !host.is_ascii() {
+        return false;
+    }
+
+    let labels: Vec<&str> = host.split('.').collect();
+    if labels.len() < 2 {
+        return false;
+    }
+
+    labels.iter().all(|label| {
+        let bytes = label.as_bytes();
+        !bytes.is_empty()
+            && bytes.len() <= 63
+            && bytes[0].is_ascii_alphanumeric()
+            && bytes[bytes.len() - 1].is_ascii_alphanumeric()
+            && bytes
+                .iter()
+                .all(|byte| byte.is_ascii_alphanumeric() || *byte == b'-')
+    })
+}
+
+fn is_source_domain(host: &str) -> bool {
+    host == SOURCE_DOMAIN_1 || host.ends_with(&format!(".{SOURCE_DOMAIN_1}"))
 }
 
 async fn send_with_retries(
     client: &Client,
     api_url: &Url,
-) -> Result<reqwest::Response, FetchError> {
+) -> Result<(reqwest::StatusCode, String), FetchError> {
     let mut retries = 0;
 
     loop {
@@ -72,22 +184,63 @@ async fn send_with_retries(
             Ok(response)
                 if is_retryable_status(response.status()) && retries < MAX_REQUEST_RETRIES =>
             {
+                let status = response.status();
+                let retry_after = response
+                    .headers()
+                    .get(reqwest::header::RETRY_AFTER)
+                    .cloned();
                 retries += 1;
-                eprintln!(
-                    "Transient API status {} for {api_url}; retrying in {:?} ({retries}/{MAX_REQUEST_RETRIES})",
-                    response.status(),
-                    retry_delay(retries - 1)
+                let delay = jittered_retry_delay(
+                    retries - 1,
+                    retry_after.as_ref(),
+                    std::time::SystemTime::now(),
+                    fastrand::u64(..),
                 );
-                tokio::time::sleep(retry_delay(retries - 1)).await;
+                drop(response);
+                eprintln!(
+                    "Transient API status {status} for {api_url}; retrying in {delay:?} ({retries}/{MAX_REQUEST_RETRIES})"
+                );
+                tokio::time::sleep(delay).await;
             }
-            Ok(response) => return Ok(response),
-            Err(error) if retries < MAX_REQUEST_RETRIES => {
+            Ok(response) => {
+                let status = response.status();
+                match response.text().await {
+                    Ok(body) => return Ok((status, body)),
+                    Err(error)
+                        if is_retryable_body_error(&error) && retries < MAX_REQUEST_RETRIES =>
+                    {
+                        retries += 1;
+                        let delay = jittered_retry_delay(
+                            retries - 1,
+                            None,
+                            std::time::SystemTime::now(),
+                            fastrand::u64(..),
+                        );
+                        eprintln!(
+                            "Transient response-body error for {api_url}: {error}; retrying in {delay:?} ({retries}/{MAX_REQUEST_RETRIES})"
+                        );
+                        tokio::time::sleep(delay).await;
+                    }
+                    Err(source) => {
+                        return Err(FetchError::Request {
+                            url: api_url.to_string(),
+                            source,
+                        });
+                    }
+                }
+            }
+            Err(error) if is_retryable_request_error(&error) && retries < MAX_REQUEST_RETRIES => {
                 retries += 1;
-                eprintln!(
-                    "Transient request error for {api_url}: {error}; retrying in {:?} ({retries}/{MAX_REQUEST_RETRIES})",
-                    retry_delay(retries - 1)
+                let delay = jittered_retry_delay(
+                    retries - 1,
+                    None,
+                    std::time::SystemTime::now(),
+                    fastrand::u64(..),
                 );
-                tokio::time::sleep(retry_delay(retries - 1)).await;
+                eprintln!(
+                    "Transient request error for {api_url}: {error}; retrying in {delay:?} ({retries}/{MAX_REQUEST_RETRIES})"
+                );
+                tokio::time::sleep(delay).await;
             }
             Err(source) => {
                 return Err(FetchError::Request {
@@ -112,10 +265,40 @@ async fn send_with_retries(
 /// assert_eq!(extract_and_validate_host("ema.com.ua"), None); // Filtered source domain
 /// assert_eq!(extract_and_validate_host(""), None); // Empty string
 /// ```
+pub fn extract_and_validate_ip(value: &str) -> Option<String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let candidate = trimmed
+        .strip_prefix('[')
+        .and_then(|v| v.strip_suffix(']'))
+        .unwrap_or(trimmed);
+    if candidate.is_empty() {
+        return None;
+    }
+
+    if let Ok(ipv4) = candidate.parse::<std::net::Ipv4Addr>() {
+        return Some(ipv4.to_string());
+    }
+
+    if let Ok(ipv6) = candidate.parse::<std::net::Ipv6Addr>() {
+        return Some(ipv6.to_string());
+    }
+
+    None
+}
+
 pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
-    let trimmed = url_string.trim();
+    let normalized = normalize_url_entry(url_string);
+    let trimmed = normalized.trim();
 
     if trimmed.is_empty() || !trimmed.contains('.') {
+        return None;
+    }
+
+    if extract_and_validate_ip(trimmed).is_some() {
         return None;
     }
 
@@ -130,13 +313,16 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
         return None;
     }
 
-    let host = parsed_url.host_str()?;
-    if !host.contains('.') {
+    let host_lower = parsed_url.host_str()?.to_ascii_lowercase();
+    if !is_valid_hostname(&host_lower) || is_source_domain(&host_lower) {
         return None;
     }
 
-    let host_lower = host.to_lowercase();
-    (host_lower != SOURCE_DOMAIN_1 && host_lower != SOURCE_DOMAIN_2).then_some(host_lower)
+    if extract_and_validate_ip(&host_lower).is_some() {
+        return None;
+    }
+
+    Some(host_lower)
 }
 
 /// Fetches all hostnames from the API using pagination.
@@ -163,6 +349,20 @@ pub async fn fetch_all_hosts(
     user_agent: &str,
     page_size: usize,
 ) -> Result<HashSet<String>, FetchError> {
+    Ok(fetch_all_entries(base_url, user_agent, page_size)
+        .await?
+        .hosts)
+}
+
+/// Fetches all unique hostnames and IP addresses from the API using pagination.
+///
+/// The API URL must use HTTPS. HTTP is permitted only for loopback addresses, such as local test servers.
+/// `page_size` is sent as the API's `count` parameter and must be greater than zero.
+pub async fn fetch_all_entries(
+    base_url: &str,
+    user_agent: &str,
+    page_size: usize,
+) -> Result<BlacklistEntries, FetchError> {
     if page_size == 0 {
         return Err(FetchError::Unexpected(
             "Page size must be greater than zero".to_string(),
@@ -195,7 +395,7 @@ pub async fn fetch_all_hosts(
         }))
         .build()?;
 
-    let mut all_hosts = HashSet::new();
+    let mut entries = BlacklistEntries::default();
     let mut offset = 0;
 
     loop {
@@ -213,17 +413,16 @@ pub async fn fetch_all_hosts(
                 .append_pair("offset", &offset.to_string());
         }
 
-        let response = send_with_retries(&client, &api_url).await?;
+        let (status, text) = send_with_retries(&client, &api_url).await?;
 
-        if !response.status().is_success() {
+        if !status.is_success() {
             return Err(FetchError::Unexpected(format!(
                 "Error: Failed to fetch API (Status: {}). URL: {}",
-                response.status().as_u16(),
+                status.as_u16(),
                 api_url
             )));
         }
 
-        let text = response.text().await?;
         let api_response: ApiResponse = match serde_json::from_str(&text) {
             Ok(data) => data,
             Err(e) => {
@@ -241,21 +440,31 @@ pub async fn fetch_all_hosts(
 
         let fetched_count = api_response.data.len();
         let mut new_hosts_count = 0;
+        let mut new_ips_count = 0;
 
         for item in &api_response.data {
-            if let Some(url_str) = &item.url
-                && let Some(host) = extract_and_validate_host(url_str)
-                && all_hosts.insert(host)
-            {
-                new_hosts_count += 1;
+            if let Some(url_str) = &item.url {
+                for url in url_str.split_whitespace() {
+                    if let Some(ip) = extract_ip_from_url(url) {
+                        if entries.ips.insert(ip) {
+                            new_ips_count += 1;
+                        }
+                    } else if let Some(host) = extract_and_validate_host(url)
+                        && entries.hosts.insert(host)
+                    {
+                        new_hosts_count += 1;
+                    }
+                }
             }
         }
 
         println!(
-            "Fetched {} items, new unique hosts added: {}, total unique hosts: {}",
+            "Fetched {} items, new unique hosts added: {}, new IPs added: {}, total unique hosts: {}, total IPs: {}",
             fetched_count,
             new_hosts_count,
-            all_hosts.len()
+            new_ips_count,
+            entries.hosts.len(),
+            entries.ips.len()
         );
 
         if fetched_count < page_size {
@@ -267,7 +476,7 @@ pub async fn fetch_all_hosts(
         tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
     }
 
-    Ok(all_hosts)
+    Ok(entries)
 }
 
 #[cfg(test)]
@@ -295,6 +504,81 @@ mod tests {
             &[Url::parse("https://api.example.com").unwrap()],
             &Url::parse("http://127.0.0.1:8080").unwrap(),
         ));
+    }
+
+    #[test]
+    fn retry_after_supports_delta_seconds_and_caps_long_delays() {
+        let now = std::time::SystemTime::UNIX_EPOCH;
+        let zero = reqwest::header::HeaderValue::from_static("0");
+        let five = reqwest::header::HeaderValue::from_static("5");
+        let excessive = reqwest::header::HeaderValue::from_static("3600");
+
+        assert_eq!(
+            retry_after_delay(Some(&zero), now),
+            Some(std::time::Duration::ZERO)
+        );
+        assert_eq!(
+            retry_after_delay(Some(&five), now),
+            Some(std::time::Duration::from_secs(5))
+        );
+        assert_eq!(
+            retry_after_delay(Some(&excessive), now),
+            Some(MAX_RETRY_DELAY)
+        );
+    }
+
+    #[test]
+    fn retry_after_supports_http_date_and_falls_back_for_invalid_values() {
+        let now = std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(1_700_000_000);
+        let retry_at = now + std::time::Duration::from_secs(12);
+        let header =
+            reqwest::header::HeaderValue::from_str(&httpdate::fmt_http_date(retry_at)).unwrap();
+        let invalid = reqwest::header::HeaderValue::from_static("not-a-date");
+
+        assert_eq!(
+            retry_after_delay(Some(&header), now),
+            Some(std::time::Duration::from_secs(12))
+        );
+        assert_eq!(retry_after_delay(Some(&invalid), now), None);
+        assert_eq!(
+            jittered_retry_delay(0, Some(&invalid), now, 249),
+            std::time::Duration::from_millis(248)
+        );
+    }
+
+    #[test]
+    fn retry_after_http_date_is_clamped_and_past_dates_mean_zero_delay() {
+        let now = std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(1_700_000_000);
+        let far_future = now + std::time::Duration::from_secs(3_600);
+        let past = now - std::time::Duration::from_secs(3_600);
+        let far_future_header =
+            reqwest::header::HeaderValue::from_str(&httpdate::fmt_http_date(far_future)).unwrap();
+        let past_header =
+            reqwest::header::HeaderValue::from_str(&httpdate::fmt_http_date(past)).unwrap();
+
+        assert_eq!(
+            retry_after_delay(Some(&far_future_header), now),
+            Some(MAX_RETRY_DELAY)
+        );
+        assert_eq!(
+            retry_after_delay(Some(&past_header), now),
+            Some(std::time::Duration::ZERO)
+        );
+    }
+
+    #[test]
+    fn jitter_is_bounded_by_exponential_backoff_ceiling() {
+        let now = std::time::SystemTime::UNIX_EPOCH;
+        assert_eq!(
+            jittered_retry_delay(0, None, now, 250),
+            std::time::Duration::from_millis(249)
+        );
+        assert_eq!(
+            jittered_retry_delay(0, None, now, 0),
+            std::time::Duration::from_millis(125)
+        );
+        assert!(exponential_retry_delay(100) <= MAX_RETRY_DELAY);
+        assert_eq!(exponential_retry_delay(0), INITIAL_RETRY_DELAY);
     }
 
     #[test]
@@ -353,13 +637,12 @@ mod tests {
             Some("xn--bcher-kva.example".to_string())
         );
         assert_eq!(
-            extract_and_validate_host("192.168.1.1"),
+            extract_and_validate_ip("192.168.1.1"),
             Some("192.168.1.1".to_string())
         );
-        assert_eq!(
-            extract_and_validate_host("http://1.2.3.4/path"),
-            Some("1.2.3.4".to_string())
-        );
+        assert_eq!(extract_and_validate_ip("[::1]"), Some("::1".to_string()));
+        assert_eq!(extract_and_validate_host("192.168.1.1"), None);
+        assert_eq!(extract_and_validate_host("http://1.2.3.4/path"), None);
     }
 
     #[test]
@@ -383,6 +666,16 @@ mod tests {
             extract_and_validate_host("https://WWW.EMA.COM.UA"),
             None,
             "Filtered source domain (uppercase)"
+        );
+        assert_eq!(
+            extract_and_validate_host("https://phishing.ema.com.ua/login"),
+            None,
+            "Filtered source subdomain"
+        );
+        assert_eq!(
+            extract_and_validate_host("https://notema.com.ua/"),
+            Some("notema.com.ua".to_string()),
+            "Do not filter domains that merely end in the source-domain string"
         );
     }
 
@@ -412,6 +705,37 @@ mod tests {
             None,
             "Spaces within (should be trimmed, but fallback might fail)"
         );
+        assert_eq!(extract_and_validate_host("https://bad..example/path"), None);
+        assert_eq!(extract_and_validate_host("https://-bad.example/path"), None);
+        assert_eq!(extract_and_validate_host("https://bad-.example/path"), None);
+        assert_eq!(
+            extract_and_validate_host("https://bad_name.example/path"),
+            None
+        );
+        assert_eq!(extract_and_validate_host("https://example."), None);
+    }
+
+    #[test]
+    fn test_hostname_validation_enforces_dns_label_limits() {
+        let valid_63_character_label = format!("{}.example", "a".repeat(63));
+        let invalid_64_character_label = format!("{}.example", "a".repeat(64));
+        let invalid_254_character_hostname = format!(
+            "{}.{}.{}.{}.{}",
+            "a".repeat(50),
+            "b".repeat(50),
+            "c".repeat(50),
+            "d".repeat(50),
+            "e".repeat(50)
+        );
+
+        assert!(is_valid_hostname("example.com"));
+        assert!(is_valid_hostname(&valid_63_character_label));
+        assert!(!is_valid_hostname(&invalid_64_character_label));
+        assert!(!is_valid_hostname(&invalid_254_character_hostname));
+        assert!(!is_valid_hostname("example..com"));
+        assert!(!is_valid_hostname("-example.com"));
+        assert!(!is_valid_hostname("example-.com"));
+        assert!(!is_valid_hostname("example_com"));
     }
 
     #[test]

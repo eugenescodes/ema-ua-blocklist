@@ -19,3 +19,10 @@ Thumbs.db
 # Rust
 target/
 **/*.rs.bk
+
+# Blocklist generator runtime transaction/lock files
+.ema-ua-blocklist.lock
+.ema-ua-blocklist.transaction.json
+.ema-ua-blocklist.transaction.committed
+.hosts_ema.txt.*.tmp
+.hosts_ema_ublock.txt.*.tmp

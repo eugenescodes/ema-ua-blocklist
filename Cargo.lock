@@ -229,6 +229,8 @@ name = "ema-ua-blocklist"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "fastrand",
+ "httpdate",
  "mockito",
  "reqwest",
  "serde",

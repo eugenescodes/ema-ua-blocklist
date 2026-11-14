@@ -2,7 +2,7 @@
 
 // Import items from the main binary crate.
 // Replace 'ema_ua_blocklist' if your package name in Cargo.toml is different.
-use ema_ua_blocklist::fetch_all_hosts;
+use ema_ua_blocklist::{fetch_all_entries, fetch_all_hosts};
 
 use std::collections::HashSet;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -184,6 +184,106 @@ async fn test_fetch_retries_transient_server_error() {
 
     server.await.unwrap();
     assert_eq!(result.unwrap(), hosts(&["recovered.example"]));
+}
+
+#[tokio::test]
+async fn test_fetch_honors_retry_after_header_for_rate_limit() {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = listener.local_addr().unwrap();
+    let server = tokio::spawn(async move {
+        for (status, headers, body) in [
+            ("429 Too Many Requests", "Retry-After: 0\r\n", ""),
+            (
+                "200 OK",
+                "Content-Type: application/json\r\n",
+                r#"{"data":[{"url":"https://rate-limit-recovered.example"}]}"#,
+            ),
+        ] {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = [0; 1024];
+            let _ = stream.read(&mut request).await;
+            let response = format!(
+                "HTTP/1.1 {status}\r\n{headers}Content-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+        }
+    });
+
+    let result = fetch_all_hosts(&format!("http://{address}"), "test-agent", 10).await;
+
+    server.await.unwrap();
+    assert_eq!(result.unwrap(), hosts(&["rate-limit-recovered.example"]));
+}
+
+#[tokio::test]
+async fn test_fetch_ignores_ip_addresses_as_hosts() {
+    let mut server = mockito::Server::new_async().await;
+    let base_url = server.url();
+
+    let mock = server
+        .mock("GET", "/?count=10&offset=0")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(
+            r#"{"data":[{"url":"http://192.168.1.10/path"},{"url":"https://example.com"}] }"#,
+        )
+        .create_async()
+        .await;
+
+    let result = fetch_all_hosts(&base_url, "test-agent", 10).await;
+
+    mock.assert_async().await;
+    assert_eq!(result.unwrap(), hosts(&["example.com"]));
+}
+
+#[tokio::test]
+async fn test_fetch_separates_ip_addresses_from_hosts() {
+    let mut server = mockito::Server::new_async().await;
+    let base_url = server.url();
+
+    let mock = server
+        .mock("GET", "/?count=10&offset=0")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(
+            r#"{"data":[{"url":"http://192.168.1.10/path https://example.com http://[2001:db8::1]/"}]}"#,
+        )
+        .create_async()
+        .await;
+
+    let result = fetch_all_entries(&base_url, "test-agent", 10)
+        .await
+        .unwrap();
+
+    mock.assert_async().await;
+    assert_eq!(result.hosts, hosts(&["example.com"]));
+    assert_eq!(
+        result.ips,
+        HashSet::from([
+            "192.168.1.10".parse().unwrap(),
+            "2001:db8::1".parse().unwrap()
+        ])
+    );
+}
+
+#[tokio::test]
+async fn test_fetch_splits_multiple_urls_and_removes_zero_width_spaces() {
+    let mut server = mockito::Server::new_async().await;
+    let base_url = server.url();
+
+    let mock = server
+        .mock("GET", "/?count=10&offset=0")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(r#"{"data":[{"url":"https://first.example https://sec\u200Bond.example."}]}"#)
+        .create_async()
+        .await;
+
+    let result = fetch_all_hosts(&base_url, "test-agent", 10).await;
+
+    mock.assert_async().await;
+    assert_eq!(result.unwrap(), hosts(&["first.example", "second.example"]));
 }
 
 #[tokio::test]

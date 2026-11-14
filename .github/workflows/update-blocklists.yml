@@ -1,0 +1,127 @@
+name: Update blocklists
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-blocklists-main
+  cancel-in-progress: false
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  generate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-update-${{ hashFiles('rust-toolchain.toml', '**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-update-
+
+      - name: Generate and validate blocklists
+        run: |
+          cargo run --release --locked
+          cargo run --release --locked -- --validate .
+
+      - name: Upload generated blocklists
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: generated-blocklists-${{ github.run_id }}
+          path: |
+            hosts_ema.txt
+            hosts_ema_ublock.txt
+          if-no-files-found: error
+          retention-days: 1
+
+  create-pull-request:
+    needs: generate
+    if: needs.generate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    env:
+      UPDATE_BRANCH: automation/update-blocklists
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download generated blocklists
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: generated-blocklists-${{ github.run_id }}
+          path: generated-blocklists
+
+      - name: Create or update pull request
+        run: |
+          git checkout -B "$UPDATE_BRANCH" origin/main
+          cp generated-blocklists/hosts_ema.txt generated-blocklists/hosts_ema_ublock.txt .
+          git add hosts_ema.txt hosts_ema_ublock.txt
+
+          pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$UPDATE_BRANCH" \
+            --base main --state open --json number --jq '.[0].number // empty')"
+          if git diff --cached --quiet; then
+            echo "Generated blocklists are unchanged."
+            if [[ -n "$pr_number" ]]; then
+              gh pr close "$pr_number" --repo "$GITHUB_REPOSITORY" \
+                --comment "The generated blocklists are already up to date."
+            fi
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update generated blocklists"
+          auth_header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="$auth_header" \
+            push --force origin "HEAD:refs/heads/$UPDATE_BRANCH"
+
+          if [[ -z "$pr_number" ]]; then
+            gh pr create --repo "$GITHUB_REPOSITORY" --head "$UPDATE_BRANCH" --base main \
+              --title "Update generated blocklists" \
+              --body "Automated EMA blocklist refresh. Generated output validation passed."
+          fi
+
+          # GITHUB_TOKEN does not trigger pull_request workflows, so dispatch CI for this commit.
+          commit_sha="$(git rev-parse HEAD)"
+          gh workflow run pipeline.yml --repo "$GITHUB_REPOSITORY" --ref "$UPDATE_BRANCH"
+
+          deadline=$((SECONDS + 1200))
+          run_id=""
+          while [[ -z "$run_id" && $SECONDS -lt $deadline ]]; do
+            run_id="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow pipeline.yml \
+              --branch "$UPDATE_BRANCH" --event workflow_dispatch --limit 10 \
+              --json databaseId,headSha --jq \
+              ".[] | select(.headSha == \"$commit_sha\") | .databaseId" | head -n1)"
+            [[ -n "$run_id" ]] || sleep 5
+          done
+
+          if [[ -z "$run_id" ]]; then
+            echo "Timed out waiting for CI workflow dispatch to start." >&2
+            exit 1
+          fi
+          timeout 1200 gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
