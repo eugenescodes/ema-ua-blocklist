@@ -1,14 +1,19 @@
 # ema-ua-blocklist
 
-Generate DNS blocklists from the official EMA (Association of Payment System Members of Ukraine) blacklist of fraudulent and phishing domains.
+Generate DNS blocklists from the official EMA (Association of Payment System
+Members of Ukraine) blacklist of fraudulent and phishing domains.
 
 > [!NOTE]
-> Data comes from the public EMA API: `https://www.ema.com.ua/wp-json/api/blacklist-query`
+> Data comes from the public EMA API:
+> `https://www.ema.com.ua/wp-json/api/blacklist-query`
 
 > [!TIP]
 > Ready-to-use URLs for Pi-hole, hosts files and ad blockers:
-> - hosts format: `https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/hosts_ema.txt`
-> - uBlock format: `https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/hosts_ema_ublock.txt`
+>
+> - hosts format:
+>   `https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/hosts_ema.txt`
+> - uBlock format:
+>   `https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/hosts_ema_ublock.txt`
 
 ## Overview
 
@@ -98,7 +103,7 @@ curl -o hosts_ema.txt https://raw.githubusercontent.com/eugenescodes/ema-ua-bloc
 
 Add the raw URL as a custom filter list:
 
-```
+```text
 https://raw.githubusercontent.com/eugenescodes/ema-ua-blocklist/refs/heads/main/hosts_ema_ublock.txt
 ```
 
@@ -135,8 +140,11 @@ cargo test --doc
 
 ## Contributing
 
-1. Open a [GitHub issue](https://github.com/eugenescodes/ema-ua-blocklist/issues) to discuss major changes before starting work.
-2. Fork the repo and create a feature branch: `git checkout -b feature/your-feature`
+1. Open a
+   [GitHub issue](https://github.com/eugenescodes/ema-ua-blocklist/issues) to
+   discuss major changes before starting work.
+2. Fork the repo and create a feature branch:
+   `git checkout -b feature/your-feature`
 3. Make your changes and run tests: `cargo test --verbose`
 4. Commit with a clear message and push to your fork.
 5. Open a Pull Request targeting `main` with a description of what and why.
@@ -147,7 +155,8 @@ cargo test --doc
 
 ## Acknowledgments
 
-- [Ukrainian Interbank Association of Payment Systems Members EMA](https://ema.com.ua) for publishing the blacklist data
+- [Ukrainian Interbank Association of Payment Systems Members EMA](https://ema.com.ua)
+  for publishing the blacklist data
 
 ---
 
