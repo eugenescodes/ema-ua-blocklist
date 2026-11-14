@@ -4,6 +4,9 @@ use std::collections::HashSet;
 use thiserror::Error;
 use url::Url;
 
+const MAX_REQUEST_RETRIES: u32 = 3;
+const INITIAL_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(250);
+
 pub const SOURCE_DOMAIN_1: &str = "ema.com.ua";
 pub const SOURCE_DOMAIN_2: &str = "www.ema.com.ua";
 
@@ -11,6 +14,12 @@ pub const SOURCE_DOMAIN_2: &str = "www.ema.com.ua";
 pub enum FetchError {
     #[error("HTTP request failed: {0}")]
     HttpRequest(#[from] reqwest::Error),
+    #[error("Network request failed for {url} after retries: {source}")]
+    Request {
+        url: String,
+        #[source]
+        source: reqwest::Error,
+    },
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("{0}")]
@@ -42,6 +51,52 @@ fn is_allowed_api_url(url: &Url) -> bool {
 fn is_allowed_redirect(previous: &[Url], next: &Url) -> bool {
     is_allowed_api_url(next)
         && !(previous.iter().any(|url| url.scheme() == "https") && next.scheme() != "https")
+}
+
+fn is_retryable_status(status: reqwest::StatusCode) -> bool {
+    status.is_server_error() || status == reqwest::StatusCode::TOO_MANY_REQUESTS
+}
+
+fn retry_delay(retry_number: u32) -> std::time::Duration {
+    INITIAL_RETRY_DELAY * 2u32.pow(retry_number)
+}
+
+async fn send_with_retries(
+    client: &Client,
+    api_url: &Url,
+) -> Result<reqwest::Response, FetchError> {
+    let mut retries = 0;
+
+    loop {
+        match client.get(api_url.clone()).send().await {
+            Ok(response)
+                if is_retryable_status(response.status()) && retries < MAX_REQUEST_RETRIES =>
+            {
+                retries += 1;
+                eprintln!(
+                    "Transient API status {} for {api_url}; retrying in {:?} ({retries}/{MAX_REQUEST_RETRIES})",
+                    response.status(),
+                    retry_delay(retries - 1)
+                );
+                tokio::time::sleep(retry_delay(retries - 1)).await;
+            }
+            Ok(response) => return Ok(response),
+            Err(error) if retries < MAX_REQUEST_RETRIES => {
+                retries += 1;
+                eprintln!(
+                    "Transient request error for {api_url}: {error}; retrying in {:?} ({retries}/{MAX_REQUEST_RETRIES})",
+                    retry_delay(retries - 1)
+                );
+                tokio::time::sleep(retry_delay(retries - 1)).await;
+            }
+            Err(source) => {
+                return Err(FetchError::Request {
+                    url: api_url.to_string(),
+                    source,
+                });
+            }
+        }
+    }
 }
 
 /// Extracts and validates a hostname from a given URL string.
@@ -158,15 +213,7 @@ pub async fn fetch_all_hosts(
                 .append_pair("offset", &offset.to_string());
         }
 
-        let response = match client.get(api_url.clone()).send().await {
-            Ok(resp) => resp,
-            Err(_) => {
-                return Err(FetchError::Unexpected(format!(
-                    "Error: Network request failed. URL: {}",
-                    api_url
-                )));
-            }
-        };
+        let response = send_with_retries(&client, &api_url).await?;
 
         if !response.status().is_success() {
             return Err(FetchError::Unexpected(format!(

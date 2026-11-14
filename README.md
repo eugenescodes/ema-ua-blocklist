@@ -38,6 +38,8 @@ files committed in this repository are always up to date.
 
 - Pulls data directly from the official EMA API
 - Handles API pagination automatically
+- Retries transient network errors, rate limits and server errors with bounded
+  backoff
 - Extracts and validates hostnames from URLs
 - Rejects non-HTTP/HTTPS entries, schemeless junk and the source domain itself
 - Normalizes hostnames to lowercase and deduplicates across all pages

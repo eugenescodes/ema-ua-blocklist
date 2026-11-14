@@ -5,6 +5,8 @@
 use ema_ua_blocklist::fetch_all_hosts;
 
 use std::collections::HashSet;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::TcpListener;
 
 // create a HashSet from a slice of strings for easier comparison
 fn hosts(items: &[&str]) -> HashSet<String> {
@@ -95,6 +97,7 @@ async fn test_fetch_api_error_status() {
         .mock("GET", "/?count=10&offset=0")
         .with_status(500)
         .with_body("Internal Server Error") // Body might not be JSON in this case
+        .expect(4)
         .create_async()
         .await;
 
@@ -150,8 +153,37 @@ async fn test_fetch_network_error() {
 
     assert!(result.is_err());
     let error_message = result.err().unwrap().to_string();
-    assert!(error_message.contains("Error: Network request failed"));
+    assert!(error_message.contains("Network request failed"));
     assert!(error_message.contains(base_url));
+}
+
+#[tokio::test]
+async fn test_fetch_retries_transient_server_error() {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = listener.local_addr().unwrap();
+    let server = tokio::spawn(async move {
+        for (status, body) in [
+            ("503 Service Unavailable", ""),
+            (
+                "200 OK",
+                r#"{"data":[{"url":"https://recovered.example"}]}"#,
+            ),
+        ] {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = [0; 1024];
+            let _ = stream.read(&mut request).await;
+            let response = format!(
+                "HTTP/1.1 {status}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).await.unwrap();
+        }
+    });
+
+    let result = fetch_all_hosts(&format!("http://{address}"), "test-agent", 10).await;
+
+    server.await.unwrap();
+    assert_eq!(result.unwrap(), hosts(&["recovered.example"]));
 }
 
 #[tokio::test]
