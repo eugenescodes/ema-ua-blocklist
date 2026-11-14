@@ -87,6 +87,7 @@ pub fn extract_and_validate_host(url_string: &str) -> Option<String> {
 /// Fetches all hostnames from the API using pagination.
 ///
 /// The API URL must use HTTPS. HTTP is permitted only for loopback addresses, such as local test servers.
+/// `page_size` is sent as the API's `count` parameter and must be greater than zero.
 ///
 /// # Examples
 ///
@@ -107,6 +108,12 @@ pub async fn fetch_all_hosts(
     user_agent: &str,
     page_size: usize,
 ) -> Result<HashSet<String>, FetchError> {
+    if page_size == 0 {
+        return Err(FetchError::Unexpected(
+            "Page size must be greater than zero".to_string(),
+        ));
+    }
+
     let parsed_base_url = Url::parse(base_url)
         .map_err(|error| FetchError::Unexpected(format!("Error: Invalid API URL: {error}")))?;
     if !is_allowed_api_url(&parsed_base_url) {
@@ -114,6 +121,12 @@ pub async fn fetch_all_hosts(
             "Error: API URL must use HTTPS (HTTP is allowed only for loopback): {base_url}"
         )));
     }
+
+    let existing_query: Vec<(String, String)> = parsed_base_url
+        .query_pairs()
+        .filter(|(key, _)| key != "count" && key != "offset")
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect();
 
     let client = Client::builder()
         .user_agent(user_agent)
@@ -133,10 +146,19 @@ pub async fn fetch_all_hosts(
     loop {
         println!("Fetching data from offset: {offset}");
 
-        let separator = if base_url.contains('?') { '&' } else { '?' };
-        let api_url = format!("{base_url}{separator}offset={offset}");
+        let mut api_url = parsed_base_url.clone();
+        api_url.set_query(None);
+        {
+            let mut query = api_url.query_pairs_mut();
+            for (key, value) in &existing_query {
+                query.append_pair(key, value);
+            }
+            query
+                .append_pair("count", &page_size.to_string())
+                .append_pair("offset", &offset.to_string());
+        }
 
-        let response = match client.get(&api_url).send().await {
+        let response = match client.get(api_url.clone()).send().await {
             Ok(resp) => resp,
             Err(_) => {
                 return Err(FetchError::Unexpected(format!(
@@ -194,7 +216,7 @@ pub async fn fetch_all_hosts(
             break;
         }
 
-        offset += page_size;
+        offset += fetched_count;
         tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
     }
 

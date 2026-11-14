@@ -20,7 +20,7 @@ async fn test_fetch_successful_pagination() {
 
     // Mock first page request (offset=0)
     let mock1 = server
-        .mock("GET", "/?offset=0") // Mockito matches path and query string
+        .mock("GET", "/?count=2&offset=0")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(r#"{"data": [{"url":"http://page1.com"},{"url":"https://page1.net"}]}"#)
@@ -29,7 +29,7 @@ async fn test_fetch_successful_pagination() {
 
     // Mock second page request (offset=2)
     let mock2 = server
-        .mock("GET", "/?offset=2")
+        .mock("GET", "/?count=2&offset=2")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(r#"{"data": [{"url":"page2.org"},{"url":" ftp://ignored.com "}]}"#) // Includes one to be filtered by extract_and_validate_host
@@ -37,7 +37,7 @@ async fn test_fetch_successful_pagination() {
         .await;
 
     let mock3 = server
-        .mock("GET", "/?offset=4")
+        .mock("GET", "/?count=2&offset=4")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(r#"{"data": []}"#)
@@ -65,7 +65,7 @@ async fn test_fetch_empty_first_page() {
 
     // Mock the first page request (offset=0) returning empty data
     let mock = server
-        .mock("GET", "/?offset=0")
+        .mock("GET", "/?count=10&offset=0")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(r#"{"data": []}"#)
@@ -92,7 +92,7 @@ async fn test_fetch_api_error_status() {
 
     // Mock the API request returning a 500 Internal Server Error
     let mock = server
-        .mock("GET", "/?offset=0")
+        .mock("GET", "/?count=10&offset=0")
         .with_status(500)
         .with_body("Internal Server Error") // Body might not be JSON in this case
         .create_async()
@@ -108,7 +108,7 @@ async fn test_fetch_api_error_status() {
     // Check the error message content
     let error_message = result.err().unwrap().to_string();
     assert!(error_message.contains("Error: Failed to fetch API (Status: 500"));
-    assert!(error_message.contains(&format!("URL: {}?offset=0", base_url))); // Check URL is part of the error
+    assert!(error_message.contains(&format!("URL: {}/?count=10&offset=0", base_url)));
 }
 
 #[tokio::test]
@@ -120,7 +120,7 @@ async fn test_fetch_invalid_json_response() {
 
     // Mock the API request returning status 200 but malformed JSON
     let mock = server
-        .mock("GET", "/?offset=0")
+        .mock("GET", "/?count=10&offset=0")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(r#"{"data": [ {"url": } ]}"#) // Malformed JSON
@@ -163,7 +163,7 @@ async fn test_fetch_stops_on_short_page() {
 
     // Mock the first page request (offset=0) returning fewer items than page_size
     let mock1 = server
-        .mock("GET", "/?offset=0")
+        .mock("GET", "/?count=5&offset=0")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(r#"{"data": [{"url":"http://item1.com"},{"url":"item2.net"}]}"#) // Only 2 items returned
@@ -177,4 +177,39 @@ async fn test_fetch_stops_on_short_page() {
     assert!(result.is_ok());
     let expected_hosts = hosts(&["item1.com", "item2.net"]);
     assert_eq!(result.unwrap(), expected_hosts);
+}
+
+#[tokio::test]
+async fn test_fetch_rejects_zero_page_size() {
+    let server = mockito::Server::new_async().await;
+    let base_url = server.url();
+
+    let result = fetch_all_hosts(&base_url, "test-agent", 0).await;
+
+    assert!(result.is_err());
+    assert!(
+        result
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("Page size must be greater than zero")
+    );
+}
+
+#[tokio::test]
+async fn test_fetch_preserves_base_query_and_overrides_pagination_params() {
+    let mut server = mockito::Server::new_async().await;
+    let base_url = format!("{}/?token=test&count=99&offset=99", server.url());
+    let mock = server
+        .mock("GET", "/?token=test&count=1&offset=0")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(r#"{"data": []}"#)
+        .create_async()
+        .await;
+
+    let result = fetch_all_hosts(&base_url, "test-agent", 1).await;
+
+    mock.assert_async().await;
+    assert!(result.unwrap().is_empty());
 }
