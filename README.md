@@ -53,20 +53,20 @@ not generate a firewall or IP-address blocklist.
 - Stages complete output files before replacing the previous generated files,
   and recovers or rolls back interrupted multi-file replacement on the next run
 - Prevents concurrent generator runs from writing into the same output directory
-- Fails rather than publishing empty lists, and validates generated files before
-  the scheduled workflow proposes them in a pull request
-- Uses CI-gated pull requests for automated publication
+- Fails rather than publishing empty lists and validates generated files before
+  publication
+- Publishes updated lists directly to the repository without creating pull
+  requests
 
 ## Automated updates
 
-GitHub Actions refreshes the lists every 6 hours and opens or updates a pull
-request. CI validates the generated files and runs on the update commit; the PR
-is left open for review and merge. The workflow does not push directly to
-`main` or enable auto-merge.
+GitHub Actions fetches and validates the lists every 6 hours, then commits any
+changes directly to `main`. No pull requests are created.
 
-To enable automated PR creation, allow GitHub Actions to create pull requests in
-the repository's Actions settings. Protect `main` by requiring a pull request
-and the `build` status check before merging.
+To enable automated commits, set **Settings → Actions → General → Workflow
+permissions** to **Read and write permissions** and ensure repository rules
+allow GitHub Actions to push to `main`. Run the `Update blocklists` workflow
+once from the Actions tab, or wait for its next scheduled run.
 
 ## Usage
 
@@ -177,17 +177,16 @@ cargo test --locked
 
 ### Validate generated lists
 
-GitHub Actions runs `--validate` against the committed lists. You can also use
-`--check-freshness` locally to compare generated and committed lists:
+GitHub Actions validates generated lists before committing them. To generate
+and validate lists locally:
 
 ```bash
+cargo run --release --locked
 cargo run --release --locked -- --validate .
-cargo run --release --locked -- --check-freshness generated-hosts .
 ```
 
 `--validate` checks list formats, hostnames, counts, sorting, uniqueness, and
-consistency between output files. `--check-freshness` also verifies that the
-generated and committed lists are no more than 24 hours old.
+consistency between output files.
 
 ## Contributing
 
