@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-19 04:43:03 UTC
+# Last modified: 2026-11-19 14:47:22 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1990
+# Number of entries: 1991
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1490,6 +1490,7 @@
 0.0.0.0 sendwithcard.top
 0.0.0.0 sent-rfi.online
 0.0.0.0 sentsbrf.online
+0.0.0.0 seren.com.ua
 0.0.0.0 sfcitycampsandleagues.com
 0.0.0.0 shar-city.com.ua
 0.0.0.0 shop-bukovel.info
