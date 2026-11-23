@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-23 04:19:35 UTC
+# Last modified: 2026-11-23 16:40:14 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1991
+# Number of entries: 1992
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -1386,6 +1386,7 @@
 0.0.0.0 pyaformob.info
 0.0.0.0 qab6u.shop
 0.0.0.0 qs-dopomoga.me
+0.0.0.0 quanta.com.ua
 0.0.0.0 quick-collecktion.ru
 0.0.0.0 quickpaymentss.expert
 0.0.0.0 rabota-poshta.eu
