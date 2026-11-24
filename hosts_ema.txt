@@ -2,13 +2,13 @@
 # Homepage: https://github.com/eugenescodes/ema-ua-blocklist
 # License: https://github.com/eugenescodes/ema-ua-blocklist/blob/main/LICENSE
 #
-# Last modified: 2026-11-24 03:32:50 UTC
+# Last modified: 2026-11-24 16:36:08 UTC
 #
 # Sources:
 # - https://www.ema.com.ua/wp-json/api/blacklist-query (ema.com.ua Blacklist API)
 #
 # Format: 0.0.0.0 domain.tld
-# Number of entries: 1992
+# Number of entries: 1993
 #
 # Source:
 0.0.0.0 0nkassashop.shop
@@ -397,6 +397,7 @@
 0.0.0.0 emtehno.com
 0.0.0.0 enow-survey.top
 0.0.0.0 epaidslife.shop
+0.0.0.0 epica.net.ua
 0.0.0.0 epicentrk-bonus.online
 0.0.0.0 epicentrk-bonus.store
 0.0.0.0 epicentrk-priz.top
